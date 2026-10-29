@@ -1,0 +1,879 @@
+<title>סטודיו הזמנות BNI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&family=Secular+One&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* Layout: a working studio. Form column on the right (RTL start), live outputs on the left; stacks to one column on phones. */
+:root {
+  --bg: #F3F4F6;
+  --surface: #FFFFFF;
+  --fg: #17181C;
+  --muted: #5C5F68;
+  --line: #DFE1E6;
+  --accent: #A3142B;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F7E6E9;
+  --ok: #17734A;
+  --font-display: "Secular One", "Assistant", "Arial Hebrew", sans-serif;
+  --font-body: "Assistant", "Arial Hebrew", Arial, sans-serif;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111215; --surface: #1A1C20; --fg: #ECEDF0; --muted: #A3A6AF; --line: #2D3036;
+    --accent: #E8566C; --accent-ink: #1A0B0E; --accent-soft: #2B1A1E; --ok: #4FC48C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111215; --surface: #1A1C20; --fg: #ECEDF0; --muted: #A3A6AF; --line: #2D3036;
+  --accent: #E8566C; --accent-ink: #1A0B0E; --accent-soft: #2B1A1E; --ok: #4FC48C;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+.page { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+.eyebrow { margin: 0 0 4px; font-weight: 800; font-size: 13px; letter-spacing: .04em; color: var(--accent); }
+h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 5vw, 44px); line-height: 1.1; text-wrap: balance; }
+.lede { margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+
+.app { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .app { grid-template-columns: minmax(0, 1fr); } }
+
+.col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; min-width: 0; }
+.box h2, .box summary { font-family: var(--font-display); font-weight: 400; font-size: 20px; margin: 0; }
+details.box > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+details.box > summary::-webkit-details-marker { display: none; }
+details.box > summary::after { content: "פתיחה"; font-family: var(--font-body); font-size: 13px; color: var(--accent); font-weight: 600; }
+details.box[open] > summary::after { content: "סגירה"; }
+.hint { font-family: var(--font-body); font-size: 13px; color: var(--muted); font-weight: 400; }
+.fields { display: grid; gap: 14px; margin-top: 16px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 420px) { .row2 { grid-template-columns: 1fr; } }
+label.f { display: grid; gap: 5px; font-weight: 600; font-size: 14px; min-width: 0; }
+label.f .sub { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+input[type=text], input[type=date], input[type=time], input[type=tel], input[type=url], textarea, select {
+  width: 100%; font: inherit; font-weight: 400; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; min-width: 0;
+}
+textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible, .swatch:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; justify-self: end; }
+
+.btn { font: inherit; font-weight: 600; font-size: 14px; border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; white-space: nowrap; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.link { border: 0; background: none; padding: 4px 2px; color: var(--accent); }
+.btn.danger { color: var(--accent); }
+.btn:disabled { opacity: .55; cursor: default; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.swatch { position: relative; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+.swatch input { position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0; }
+.swatch.on { box-shadow: 0 0 0 2px var(--fg); }
+.swatch.custom { background: conic-gradient(#e33, #ec3, #3c6, #3ae, #93e, #e33); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 14px; font-weight: 600; border: 0; background: transparent; color: var(--muted); padding: 7px 14px; cursor: pointer; }
+.seg button[aria-pressed=true] { background: var(--fg); color: var(--bg); }
+
+.upload { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.thumb { width: 56px; height: 56px; border-radius: 50%; background: var(--bg) center/cover no-repeat; border: 1px dashed var(--line); flex: none; }
+.thumb.logo { border-radius: 8px; background-size: contain; }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.sliders { display: grid; gap: 8px; }
+.sliders label { display: grid; grid-template-columns: 90px 1fr; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+input[type=range] { accent-color: var(--accent); width: 100%; }
+
+.roster { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 14px; padding: 12px; background: var(--bg); border-radius: 8px; }
+.roster select { background: var(--surface); }
+.roster .msg { grid-column: 1 / -1; font-size: 13px; color: var(--muted); margin: 0; }
+.confirm { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+
+.out-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.out-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 24px; margin: 0; display: flex; align-items: center; gap: 10px; }
+.badge { font-family: var(--font-body); font-size: 12px; font-weight: 800; letter-spacing: .03em; background: var(--accent-soft); color: var(--accent); padding: 3px 9px; border-radius: 999px; }
+.note { margin: 8px 0 0; font-size: 13.5px; color: var(--muted); }
+
+.previews { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; margin-top: 16px; }
+.pv { display: grid; gap: 8px; min-width: 0; max-width: 100%; }
+.pv img { display: block; height: 330px; width: auto; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 24px -12px rgba(0,0,0,.25); background: var(--line); }
+.pv.wide img { height: auto; width: 520px; }
+.pv-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.pv-meta b { font-size: 14px; }
+.pv-meta span { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; direction: ltr; }
+@media (max-width: 560px) { .pv img { height: auto; width: 100%; } .pv { flex: 1 1 100%; } .pv.half { flex: 1 1 calc(50% - 9px); } .pv.wide img { width: 100%; } }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 12px; border-bottom: 1px solid var(--line); }
+.tabs button { font: inherit; font-weight: 600; font-size: 14.5px; background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 10px; color: var(--muted); cursor: pointer; margin-bottom: -1px; }
+.tabs button[aria-selected=true] { color: var(--fg); border-bottom-color: var(--accent); }
+#msgText { min-height: 300px; font-size: 15px; background: var(--bg); }
+.msg-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; margin-top: 10px; }
+.status { font-size: 13.5px; color: var(--muted); min-height: 1.5em; margin: 6px 0 0; }
+.status.ok { color: var(--ok); }
+.status.err { color: var(--accent); }
+.ai { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ai select { width: auto; padding: 7px 10px; }
+
+@media (prefers-reduced-motion: no-preference) { .btn, .seg button, .tabs button { transition: background-color .15s, border-color .15s, color .15s; } }
+</style>
+
+<div class="page" dir="rtl" lang="he">
+  <header class="top">
+    <div>
+      <p class="eyebrow">המצגת המרכזית של השבוע</p>
+      <h1>סטודיו הזמנות BNI</h1>
+      <p class="lede">ממלאים מי מציג השבוע ומקבלים הודעת וואטסאפ, פוסט לרשתות, תזכורת בוקר וגרפיקה בארבעה פורמטים. פרטי הקבוצה ורשימת החברים נשמרים לשבוע הבא.</p>
+    </div>
+  </header>
+
+  <main class="app">
+    <section class="col" aria-label="פרטים">
+      <details class="box" id="groupBox">
+        <summary>פרטי הקבוצה <span class="hint">ממלאים פעם אחת</span></summary>
+        <div class="fields">
+          <label class="f">שם הקבוצה<input type="text" id="g_chapter"></label>
+          <label class="f">מקום המפגש<input type="text" id="g_location"></label>
+          <div class="row2">
+            <label class="f">שעת המפגש<input type="time" id="g_time"></label>
+            <label class="f">יום המפגש
+              <select id="g_weekday">
+                <option value="0">ראשון</option><option value="1">שני</option><option value="2">שלישי</option>
+                <option value="3">רביעי</option><option value="4">חמישי</option><option value="5">שישי</option>
+              </select>
+            </label>
+          </div>
+          <label class="f">אישור הגעה / איש קשר <span class="sub">שם וטלפון, יופיע בהודעה</span><input type="text" id="g_contact"></label>
+          <label class="f">קישור להרשמה <span class="sub">לא חובה</span><input type="url" id="g_link" dir="ltr" placeholder="https://"></label>
+          <label class="f">כותרת התווית בגרפיקה<input type="text" id="g_label"></label>
+          <div class="f">צבע הקבוצה
+            <div class="swatches" id="swatches"></div>
+          </div>
+          <div class="f">סגנון הגרפיקה
+            <div class="seg" role="group" aria-label="סגנון">
+              <button type="button" data-style="color" aria-pressed="true">צבעוני</button>
+              <button type="button" data-style="light" aria-pressed="false">בהיר</button>
+            </div>
+          </div>
+          <div class="f">לוגו הקבוצה
+            <div class="upload">
+              <div class="thumb logo" id="logoThumb"></div>
+              <span class="btn file-btn">העלאת לוגו<input type="file" id="logoFile" accept="image/*" aria-label="העלאת לוגו"></span>
+              <button type="button" class="btn link" id="logoRemove" hidden>הסרה</button>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="box">
+        <h2>מי מציג השבוע</h2>
+        <div class="roster">
+          <select id="rosterSel" aria-label="בחירה מרשימת החברים"></select>
+          <button type="button" class="btn" id="rosterSave">שמירה לרשימה</button>
+          <p class="msg" id="rosterMsg">חברים ששמרת כאן ימולאו אוטומטית עם השם, העיסוק והתמונה.</p>
+          <div class="confirm" id="rosterConfirm" hidden>
+            <span id="rosterConfirmText"></span>
+            <button type="button" class="btn danger" id="rosterDelYes">מחיקה</button>
+            <button type="button" class="btn" id="rosterDelNo">ביטול</button>
+          </div>
+        </div>
+        <div class="fields">
+          <label class="f">שם המציג/ה<input type="text" id="t_name"></label>
+          <label class="f">תחום / עיסוק<input type="text" id="t_profession"></label>
+          <label class="f">נושא המצגת<input type="text" id="t_title"></label>
+          <label class="f">משפט פתיחה <span class="sub">מה יקבלו מי שיגיעו? מופיע בהודעה ובסטורי</span>
+            <textarea id="t_teaser" rows="3" maxlength="220"></textarea>
+            <span class="count" id="teaserCount"></span>
+          </label>
+          <label class="f">תאריך המפגש<input type="date" id="t_date"></label>
+          <div class="f">תמונת המציג/ה
+            <div class="upload">
+              <div class="thumb" id="photoThumb"></div>
+              <span class="btn file-btn">העלאת תמונה<input type="file" id="photoFile" accept="image/*" aria-label="העלאת תמונה"></span>
+              <button type="button" class="btn link" id="photoRemove" hidden>הסרה</button>
+            </div>
+          </div>
+          <div class="sliders" id="photoSliders" hidden>
+            <label>הגדלה<input type="range" id="t_zoom" min="1" max="3" step="0.01"></label>
+            <label>ימינה / שמאלה<input type="range" id="t_ox" min="-1" max="1" step="0.01"></label>
+            <label>למעלה / למטה<input type="range" id="t_oy" min="-1" max="1" step="0.01"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>גיבוי</h2>
+        <p class="note">הנתונים נשמרים בדפדפן הזה בלבד. כדאי לשמור קובץ גיבוי מדי פעם, או כדי לעבור למחשב אחר.</p>
+        <div class="btnrow" style="margin-top:12px">
+          <button type="button" class="btn" id="backupOut">שמירת קובץ גיבוי</button>
+          <span class="btn file-btn">טעינת גיבוי<input type="file" id="backupIn" accept="application/json,.json" aria-label="טעינת גיבוי"></span>
+        </div>
+        <p class="status" id="backupStatus"></p>
+      </div>
+    </section>
+
+    <section class="col" aria-label="תוצרים">
+      <div class="box">
+        <div class="out-head">
+          <h2>גרפיקה <span class="badge" id="exampleBadge">נתוני דוגמה</span></h2>
+          <button type="button" class="btn primary" id="zipBtn">שמירת כל הפורמטים (ZIP)</button>
+        </div>
+        <p class="note" id="saveHint" hidden>כדי לשמור תמונה: לחיצה ארוכה עליה בטלפון, או קליק ימני ו"שמירת תמונה" במחשב.</p>
+        <p class="status" id="saveStatus"></p>
+        <div class="previews" id="previews"></div>
+      </div>
+
+      <div class="box">
+        <h2>הודעות</h2>
+        <div class="tabs" role="tablist" id="tabs">
+          <button role="tab" type="button" data-tab="whatsapp" aria-selected="true">הזמנה לוואטסאפ</button>
+          <button role="tab" type="button" data-tab="social" aria-selected="false">פוסט לפייסבוק ואינסטגרם</button>
+          <button role="tab" type="button" data-tab="reminder" aria-selected="false">תזכורת ביום המפגש</button>
+        </div>
+        <textarea id="msgText" aria-label="נוסח ההודעה"></textarea>
+        <div class="msg-actions">
+          <div class="btnrow">
+            <button type="button" class="btn primary" id="copyBtn">העתקה</button>
+            <button type="button" class="btn link" id="restoreBtn" hidden>חזרה לנוסח האוטומטי</button>
+          </div>
+          <div class="ai" id="aiBox" hidden>
+            <select id="aiTone" aria-label="טון">
+              <option value="חם ואישי">טון חם ואישי</option>
+              <option value="ענייני ומקצועי">טון ענייני</option>
+              <option value="קליל עם קריצה">טון קליל</option>
+            </select>
+            <button type="button" class="btn" id="aiBtn">ניסוח מחדש עם Claude</button>
+          </div>
+        </div>
+        <p class="status" id="msgStatus"></p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+const $ = (id) => document.getElementById(id);
+const KEY = "bni-studio-v1";
+const DISPLAY = '"Secular One", "Assistant", sans-serif';
+const BODY = '"Assistant", Arial, sans-serif';
+const SWATCHES = ["#A3142B", "#1F3A5F", "#0E5A4C", "#3D2B5C", "#B4471B", "#1B1C20"];
+const FORMATS = [
+  { id: "whatsapp", label: "וואטסאפ", w: 1080, h: 1350, cls: "half" },
+  { id: "story", label: "סטורי", w: 1080, h: 1920, cls: "half" },
+  { id: "square", label: "אינסטגרם ריבועי", w: 1080, h: 1080, cls: "" },
+  { id: "facebook", label: "פייסבוק", w: 1200, h: 630, cls: "wide" },
+];
+
+function nextWeekday(wd) {
+  const d = new Date(); d.setHours(12, 0, 0, 0);
+  const diff = (wd - d.getDay() + 7) % 7 || 7;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
+const SAMPLE_GROUP = { chapter: "BNI אלפא", location: "אולמי הגן, רמת גן", time: "07:00", weekday: "2", contact: "יונתן, 050-0000000", link: "", label: "המצגת המרכזית · 10 דקות", accent: "#A3142B", style: "color", logo: null };
+const SAMPLE_TALK = { name: "דנה לוי", profession: "יועצת משכנתאות", title: "שלוש טעויות שעולות לזוגות מאות אלפי שקלים במשכנתא", teaser: "מה לבדוק לפני שחותמים, ואיך מזהים לקוח שצריך ייעוץ עוד לפני שהוא עצמו יודע.", date: "", photo: null, zoom: 1, ox: 0, oy: 0 };
+
+let state = { group: { ...SAMPLE_GROUP }, talk: { ...SAMPLE_TALK, date: nextWeekday(2) }, roster: [], example: true };
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+  if (saved && saved.group) {
+    state = { ...state, ...saved, group: { ...SAMPLE_GROUP, ...saved.group }, talk: { ...SAMPLE_TALK, ...saved.talk } };
+    if (!state.talk.date || state.talk.date < new Date().toISOString().slice(0, 10)) state.talk.date = nextWeekday(+state.group.weekday);
+  }
+} catch (e) {}
+
+let saveTimer;
+function persist() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }, 300);
+}
+
+/* ---------- images ---------- */
+const imgCache = new Map();
+function loadImg(src) {
+  if (!src) return Promise.resolve(null);
+  if (imgCache.has(src)) return imgCache.get(src);
+  const p = new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+  imgCache.set(src, p);
+  return p;
+}
+function readFile(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+}
+async function shrink(dataUrl, max, type) {
+  const img = await loadImg(dataUrl);
+  if (!img) return null;
+  const s = Math.min(1, max / Math.max(img.width, img.height));
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL(type, 0.88);
+}
+
+/* ---------- color ---------- */
+function hexToRgb(h) { const n = parseInt(h.replace("#", ""), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function lum(h) { const [r, g, b] = hexToRgb(h).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; }
+function rgba(h, a) { const [r, g, b] = hexToRgb(h); return `rgba(${r},${g},${b},${a})`; }
+function palette(g) {
+  const acc = g.accent, light = lum(acc) > 0.4;
+  if (g.style === "light") {
+    return { bg: "#FAFAFB", fg: "#17181C", sub: "rgba(23,24,28,.7)", rule: "rgba(23,24,28,.16)", ring: light ? "#17181C" : acc, pillBg: acc, pillFg: light ? "#17181C" : "#FFFFFF", name: light ? "#17181C" : acc, water: rgba(acc, 0.08), avatar: rgba(acc, 0.12), chip: "transparent" };
+  }
+  const fg = light ? "#17181C" : "#FFFFFF";
+  return { bg: acc, fg, sub: light ? "rgba(23,24,28,.74)" : "rgba(255,255,255,.82)", rule: light ? "rgba(23,24,28,.2)" : "rgba(255,255,255,.28)", ring: fg, pillBg: fg, pillFg: acc, name: fg, water: light ? "rgba(0,0,0,.06)" : "rgba(255,255,255,.07)", avatar: light ? "rgba(0,0,0,.08)" : "rgba(255,255,255,.14)", chip: "#FFFFFF" };
+}
+
+/* ---------- dates & text ---------- */
+function dateParts(iso) {
+  const d = new Date((iso || nextWeekday(2)) + "T12:00:00");
+  return {
+    day: d.getDate(),
+    month: d.toLocaleDateString("he-IL", { month: "long" }),
+    weekday: d.toLocaleDateString("he-IL", { weekday: "long" }),
+    long: d.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" }),
+  };
+}
+const clean = (s) => String(s || "").trim();
+function joinLines(arr) {
+  return arr.filter((l) => l !== null && l !== undefined && l !== false).join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+function hashtag(s) { const t = clean(s).replace(/[^\p{L}\p{N}\s]/gu, "").trim().replace(/\s+/g, "_"); return t ? "#" + t : null; }
+
+const TEMPLATES = {
+  whatsapp(g, t) {
+    const d = dateParts(t.date);
+    return joinLines([
+      `*הזמנה למפגש ${clean(g.chapter)}*`,
+      "",
+      `🗓️ ${d.long} | ${clean(g.time)}`,
+      clean(g.location) && `📍 ${clean(g.location)}`,
+      "",
+      `במצגת המרכזית השבוע: *${clean(t.name)}*${clean(t.profession) ? `, ${clean(t.profession)}` : ""}`,
+      clean(t.title) && `_"${clean(t.title)}"_`,
+      clean(t.teaser) && "",
+      clean(t.teaser),
+      "",
+      "מכירים מישהו שזה יכול לעזור לו? זה הזמן להביא אותו כאורח.",
+      clean(g.contact) && `לאישור הגעה: ${clean(g.contact)}`,
+      clean(g.link),
+    ]);
+  },
+  social(g, t) {
+    const d = dateParts(t.date);
+    return joinLines([
+      `השבוע במפגש ${clean(g.chapter)}: ${clean(t.name)}${clean(t.profession) ? `, ${clean(t.profession)},` : ""} במצגת של 10 דקות${clean(t.title) ? ` על "${clean(t.title)}"` : ""}.`,
+      clean(t.teaser) && "",
+      clean(t.teaser),
+      "",
+      `${d.long} · ${clean(g.time)}${clean(g.location) ? ` · ${clean(g.location)}` : ""}`,
+      `אורחים מוזמנים${clean(g.contact) ? `. לפרטים: ${clean(g.contact)}` : ""}`,
+      clean(g.link),
+      "",
+      ["#BNI", "#נטוורקינג", "#עסקים", hashtag(t.profession)].filter(Boolean).join(" "),
+    ]);
+  },
+  reminder(g, t) {
+    const hour = parseInt(clean(g.time).split(":")[0], 10);
+    return joinLines([
+      `${hour < 12 ? "*בוקר טוב!*" : "*תזכורת:*"} היום ב-${clean(g.time)} מפגש ${clean(g.chapter)}.`,
+      `במצגת המרכזית: *${clean(t.name)}*${clean(t.title) ? ` עם "${clean(t.title)}"` : ""}.`,
+      clean(g.location) && `📍 ${clean(g.location)}`,
+      "",
+      "נתראה שם!",
+      clean(g.link),
+    ]);
+  },
+};
+
+/* ---------- canvas drawing ---------- */
+function font(ctx, weight, size, fam) { ctx.font = `${weight} ${Math.round(size)}px ${fam}`; }
+function wrap(ctx, text, maxW) {
+  const words = clean(text).split(/\s+/).filter(Boolean); const lines = []; let line = "";
+  for (const w of words) {
+    const t = line ? line + " " + w : w;
+    if (!line || ctx.measureText(t).width <= maxW) line = t; else { lines.push(line); line = w; }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function ellipsize(ctx, s, maxW) {
+  if (ctx.measureText(s).width <= maxW) return s;
+  while (s.length > 1 && ctx.measureText(s + "…").width > maxW) s = s.slice(0, -1);
+  return s.trim() + "…";
+}
+function block(ctx, text, o) {
+  let size = o.size, lines;
+  for (;;) {
+    font(ctx, o.weight, size, o.fam);
+    lines = wrap(ctx, text, o.maxW);
+    const fits = lines.length <= o.maxLines && lines.every((l) => ctx.measureText(l).width <= o.maxW);
+    if (fits || size <= o.min) break;
+    size = Math.max(o.min, size * 0.95);
+  }
+  if (lines.length > o.maxLines) { lines = lines.slice(0, o.maxLines); lines[o.maxLines - 1] = ellipsize(ctx, lines[o.maxLines - 1] + "…", o.maxW).replace(/……$/, "…"); }
+  lines = lines.map((l) => ellipsize(ctx, l, o.maxW));
+  const lh = o.lh || 1.18;
+  return { lines, size, weight: o.weight, fam: o.fam, lh, h: lines.length ? lines.length * size * lh : 0 };
+}
+function drawBlock(ctx, b, x, y, color, align) {
+  font(ctx, b.weight, b.size, b.fam); ctx.fillStyle = color; ctx.textAlign = align || "right"; ctx.textBaseline = "alphabetic";
+  b.lines.forEach((l, i) => ctx.fillText(l, x, y + b.size * (0.86 + i * b.lh)));
+  return b.h;
+}
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function drawPill(ctx, xRight, y, text, P, u) {
+  font(ctx, 800, 32 * u, BODY);
+  const h = 62 * u, w = ctx.measureText(text).width + 56 * u;
+  ctx.fillStyle = P.pillBg; roundRect(ctx, xRight - w, y, w, h, h / 2); ctx.fill();
+  ctx.fillStyle = P.pillFg; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, xRight - w / 2, y + h / 2 + 2 * u);
+  return h;
+}
+
+function drawHeader(ctx, W, pad, y, P, S, u, logo) {
+  const h = 84 * u;
+  const chap = block(ctx, S.group.chapter, { weight: 800, size: 42 * u, min: 26 * u, fam: BODY, maxW: W - 2 * pad - (logo ? 240 * u : 0), maxLines: 1 });
+  drawBlock(ctx, chap, W - pad, y + (h - chap.h) / 2, P.fg);
+  if (logo) {
+    const boxH = h, boxW = 220 * u, padIn = P.chip === "transparent" ? 0 : 12 * u;
+    const s = Math.min((boxW - 2 * padIn) / logo.width, (boxH - 2 * padIn) / logo.height);
+    const lw = logo.width * s, lh = logo.height * s;
+    if (P.chip !== "transparent") { ctx.fillStyle = P.chip; roundRect(ctx, pad, y, lw + 2 * padIn, boxH, 12 * u); ctx.fill(); }
+    ctx.drawImage(logo, pad + padIn, y + (boxH - lh) / 2, lw, lh);
+  }
+  return h;
+}
+
+function initials(name) { return clean(name).split(/\s+/).slice(0, 2).map((w) => w[0] || "").join(""); }
+
+function drawPhoto(ctx, cx, cy, r, S, P, u, photo) {
+  ctx.save();
+  ctx.strokeStyle = P.ring; ctx.lineCap = "round";
+  ctx.lineWidth = 5 * u; ctx.beginPath(); ctx.arc(cx, cy, r + 16 * u, 0, Math.PI * 2); ctx.stroke();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI * 2) / 10;
+    const r1 = r + 32 * u, r2 = r + (i === 0 ? 62 : 48) * u;
+    ctx.lineWidth = (i === 0 ? 9 : 5) * u;
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); ctx.stroke();
+  }
+  ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+  if (photo) {
+    const D = 2 * r, t = S.talk;
+    const s = Math.max(D / photo.width, D / photo.height) * (+t.zoom || 1);
+    const dw = photo.width * s, dh = photo.height * s;
+    ctx.drawImage(photo, cx - dw / 2 - (+t.ox || 0) * (dw - D) / 2, cy - dh / 2 - (+t.oy || 0) * (dh - D) / 2, dw, dh);
+  } else {
+    ctx.fillStyle = P.avatar; ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
+    font(ctx, 400, r * 0.8, DISPLAY); ctx.fillStyle = P.fg; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(initials(S.talk.name) || "?", cx, cy + r * 0.06);
+  }
+  ctx.restore();
+}
+
+function drawDate(ctx, x, cy, S, P, u, k, maxW) {
+  const d = dateParts(S.talk.date);
+  const parts = [
+    { t: String(d.day), w: 400, s: 170 * k, f: DISPLAY, c: P.fg, lh: 0.95 },
+    { t: d.month, w: 800, s: 46 * k, f: BODY, c: P.fg, lh: 1.25 },
+    { t: d.weekday, w: 600, s: 36 * k, f: BODY, c: P.sub, lh: 1.3 },
+    { t: clean(S.group.time), w: 400, s: 60 * k, f: DISPLAY, c: P.fg, lh: 1.15 },
+  ].map((p) => ({ ...p, s: p.s * u }));
+  const total = parts.reduce((a, p) => a + p.s * p.lh, 0);
+  let y = cy - total / 2;
+  ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  for (const p of parts) { font(ctx, p.w, p.s, p.f); ctx.fillStyle = p.c; ctx.fillText(ellipsize(ctx, p.t, maxW), x, y + p.s * 0.85); y += p.s * p.lh; }
+}
+
+function bg(ctx, W, H, P) {
+  ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
+  font(ctx, 400, H * 0.62, DISPLAY); ctx.fillStyle = P.water; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  ctx.direction = "ltr"; ctx.fillText("10", -W * 0.05, H * 1.07); ctx.direction = "rtl";
+}
+
+function footer(ctx, W, pad, y, P, S, u) {
+  ctx.fillStyle = P.rule; ctx.fillRect(pad, y, W - 2 * pad, Math.max(2, 2 * u));
+  const right = block(ctx, S.group.location, { weight: 600, size: 34 * u, min: 24 * u, fam: BODY, maxW: (W - 2 * pad) * 0.62, maxLines: 1 });
+  drawBlock(ctx, right, W - pad, y + 30 * u, P.fg);
+  font(ctx, 800, 34 * u, BODY); ctx.fillStyle = P.fg; ctx.textAlign = "left"; ctx.fillText("אורחים מוזמנים", pad, y + 30 * u + right.size * 0.86 + (34 * u - right.size) * 0);
+}
+
+function layoutStack(ctx, f, S, P, k, imgs) {
+  const W = f.w, H = f.h, u = W / 1080, pad = 76 * u;
+  const story = f.id === "story", square = f.id === "square";
+  const top = story ? 210 * u : 70 * u;
+  const footY = story ? H - 270 * u : H - 130 * u;
+  ctx.direction = "rtl";
+  bg(ctx, W, H, P);
+  let y = top;
+  y += drawHeader(ctx, W, pad, y, P, S, u, imgs.logo) + (story ? 60 : square ? 36 : 48) * u * k;
+  if (!square) y += drawPill(ctx, W - pad, y, S.group.label, P, u) + (story ? 70 : 40) * u * k;
+  const r = (story ? 225 : square ? 150 : 185) * u * k, R = r + 62 * u;
+  const cx = W - pad - R + 14 * u, cy = y + R;
+  drawPhoto(ctx, cx, cy, r, S, P, u, imgs.photo);
+  const colW = W - 2 * pad - 2 * R - 20 * u;
+  if (square) {
+    drawPill(ctx, pad + Math.min(colW, 520 * u), cy - R + 6 * u, S.group.label, P, u * 0.9);
+    drawDate(ctx, pad, cy + 40 * u, S, P, u, 0.78 * k, colW);
+  } else {
+    drawDate(ctx, pad, cy, S, P, u, (story ? 1.15 : 0.95) * k, colW);
+  }
+  y += 2 * R + (story ? 70 : 40) * u * k;
+  const maxW = W - 2 * pad;
+  const nm = block(ctx, S.talk.name, { weight: 400, size: (story ? 118 : square ? 86 : 100) * u * k, min: 56 * u, fam: DISPLAY, maxW, maxLines: 2, lh: 1.05 });
+  y += drawBlock(ctx, nm, W - pad, y, P.name) + 6 * u;
+  const pr = block(ctx, S.talk.profession, { weight: 600, size: (story ? 50 : 42) * u * k, min: 28 * u, fam: BODY, maxW, maxLines: 1 });
+  y += drawBlock(ctx, pr, W - pad, y, P.sub) + (story ? 44 : 26) * u * k;
+  if (clean(S.talk.title)) {
+    const ti = block(ctx, `"${clean(S.talk.title)}"`, { weight: 800, size: (story ? 58 : square ? 44 : 50) * u * k, min: 30 * u, fam: BODY, maxW, maxLines: story ? 3 : 2, lh: 1.2 });
+    y += drawBlock(ctx, ti, W - pad, y, P.fg) + (story ? 36 : 20) * u * k;
+  }
+  if (!square && clean(S.talk.teaser)) {
+    const te = block(ctx, S.talk.teaser, { weight: 400, size: (story ? 40 : 34) * u * k, min: 26 * u, fam: BODY, maxW, maxLines: story ? 4 : 2, lh: 1.35 });
+    if (story || y + te.h < footY - 24 * u) y += drawBlock(ctx, te, W - pad, y, P.sub);
+  }
+  footer(ctx, W, pad, footY, P, S, u);
+  return y <= footY - 16 * u;
+}
+
+function layoutWide(ctx, f, S, P, k, imgs) {
+  const W = f.w, H = f.h, u = H / 760, pad = 60 * u;
+  ctx.direction = "rtl";
+  bg(ctx, W, H, P);
+  const r = 205 * u, R = r + 62 * u;
+  const cx = pad + R + 10 * u, cy = H / 2;
+  drawPhoto(ctx, cx, cy, r, S, P, u, imgs.photo);
+  const left = pad + 2 * R + 70 * u, maxW = W - pad - left;
+  let y = pad + 6 * u;
+  const chap = block(ctx, S.group.chapter, { weight: 800, size: 40 * u, min: 26 * u, fam: BODY, maxW: maxW - (imgs.logo ? 200 * u : 0), maxLines: 1 });
+  drawBlock(ctx, chap, W - pad, y, P.fg);
+  if (imgs.logo) {
+    const lh = 70 * u, padIn = P.chip === "transparent" ? 0 : 10 * u;
+    const s = Math.min((180 * u - 2 * padIn) / imgs.logo.width, (lh - 2 * padIn) / imgs.logo.height);
+    const w = imgs.logo.width * s, h = imgs.logo.height * s;
+    if (P.chip !== "transparent") { ctx.fillStyle = P.chip; roundRect(ctx, left, y - 12 * u, w + 2 * padIn, lh, 10 * u); ctx.fill(); }
+    ctx.drawImage(imgs.logo, left + padIn, y - 12 * u + (lh - h) / 2, w, h);
+  }
+  y += 70 * u * k;
+  y += drawPill(ctx, W - pad, y, S.group.label, P, u * 0.95) + 34 * u * k;
+  const nm = block(ctx, S.talk.name, { weight: 400, size: 92 * u * k, min: 52 * u, fam: DISPLAY, maxW, maxLines: 2, lh: 1.05 });
+  y += drawBlock(ctx, nm, W - pad, y, P.name) + 4 * u;
+  const pr = block(ctx, S.talk.profession, { weight: 600, size: 40 * u * k, min: 26 * u, fam: BODY, maxW, maxLines: 1 });
+  y += drawBlock(ctx, pr, W - pad, y, P.sub) + 22 * u * k;
+  if (clean(S.talk.title)) {
+    const ti = block(ctx, `"${clean(S.talk.title)}"`, { weight: 800, size: 44 * u * k, min: 28 * u, fam: BODY, maxW, maxLines: 2, lh: 1.2 });
+    y += drawBlock(ctx, ti, W - pad, y, P.fg) + 18 * u * k;
+  }
+  const d = dateParts(S.talk.date);
+  const footY = H - pad - 96 * u;
+  ctx.fillStyle = P.rule; ctx.fillRect(left, footY, maxW, Math.max(2, 2 * u));
+  const dl = block(ctx, `${d.long} · ${clean(S.group.time)}`, { weight: 800, size: 38 * u, min: 26 * u, fam: BODY, maxW, maxLines: 1 });
+  drawBlock(ctx, dl, W - pad, footY + 22 * u, P.fg);
+  const lo = block(ctx, `${clean(S.group.location)}${clean(S.group.location) ? " · " : ""}אורחים מוזמנים`, { weight: 600, size: 32 * u, min: 22 * u, fam: BODY, maxW, maxLines: 1 });
+  drawBlock(ctx, lo, W - pad, footY + 22 * u + dl.h + 4 * u, P.sub);
+  return y <= footY - 10 * u;
+}
+
+async function render(f, canvas) {
+  const imgs = { photo: await loadImg(state.talk.photo), logo: await loadImg(state.group.logo) };
+  canvas.width = f.w; canvas.height = f.h;
+  const ctx = canvas.getContext("2d");
+  const P = palette(state.group);
+  const fn = f.id === "facebook" ? layoutWide : layoutStack;
+  for (const k of [1, 0.94, 0.88, 0.82, 0.76, 0.7]) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, f.w, f.h);
+    if (fn(ctx, f, state, P, k, imgs)) break;
+  }
+}
+
+/* ---------- previews ---------- */
+const previews = {};
+function buildPreviews() {
+  const wrap = $("previews");
+  for (const f of FORMATS) {
+    const el = document.createElement("figure");
+    el.className = "pv " + f.cls; el.style.margin = "0";
+    el.innerHTML = `<img alt=""><figcaption class="pv-meta"><span><b></b></span><span></span><button type="button" class="btn">שמירה</button></figcaption>`;
+    el.querySelector("b").textContent = f.label;
+    el.querySelectorAll(".pv-meta > span")[1].textContent = `${f.w}×${f.h}`;
+    el.querySelector("img").alt = `תצוגה מקדימה: ${f.label}`;
+    el.querySelector("button").addEventListener("click", () => saveOne(f));
+    wrap.appendChild(el);
+    previews[f.id] = { el, img: el.querySelector("img"), canvas: document.createElement("canvas"), url: null };
+  }
+}
+let renderSeq = 0;
+async function renderAll() {
+  const seq = ++renderSeq;
+  for (const f of FORMATS) {
+    const p = previews[f.id];
+    await render(f, p.canvas);
+    if (seq !== renderSeq) return;
+    const blob = await new Promise((r) => p.canvas.toBlob(r, "image/png"));
+    if (seq !== renderSeq || !blob) return;
+    if (p.url) URL.revokeObjectURL(p.url);
+    p.url = URL.createObjectURL(blob); p.blob = blob; p.img.src = p.url;
+  }
+}
+let rTimer;
+function scheduleRender() { clearTimeout(rTimer); rTimer = setTimeout(renderAll, 140); }
+
+/* ---------- downloads ---------- */
+let downloads = null;
+const slug = (s) => clean(s).replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, "-").slice(0, 40);
+const baseName = () => `bni-${state.talk.date}-${slug(state.talk.name) || "presenter"}`;
+function saveMsg(text, cls) { const s = $("saveStatus"); s.textContent = text; s.className = "status " + (cls || ""); }
+async function doSave(filename, data) {
+  if (!downloads) { $("saveHint").hidden = false; saveMsg("השמירה הישירה לא זמינה בתצוגה הזו. אפשר לשמור כל תמונה ידנית.", "err"); return; }
+  try {
+    await downloads.save({ filename, data });
+    saveMsg(`נשמר: ${filename}`, "ok");
+  } catch (e) {
+    if (e && e.code === "declined") saveMsg("השמירה בוטלה.");
+    else if (e && e.code === "rate_limited") saveMsg("חלון שמירה כבר פתוח. אשרו אותו ונסו שוב.");
+    else saveMsg("לא הצלחנו לשמור את הקובץ. אפשר לשמור את התמונה ידנית בלחיצה ארוכה או בקליק ימני.", "err");
+  }
+}
+async function saveOne(f) {
+  await renderAll();
+  const p = previews[f.id];
+  if (p.blob) doSave(`${baseName()}-${f.id}.png`, p.blob);
+}
+$("zipBtn").addEventListener("click", async () => {
+  if (!window.JSZip) { saveMsg("לא הצלחנו לטעון את רכיב ה-ZIP. אפשר לשמור כל פורמט בנפרד.", "err"); return; }
+  $("zipBtn").disabled = true;
+  try {
+    await renderAll();
+    const zip = new JSZip();
+    for (const f of FORMATS) if (previews[f.id].blob) zip.file(`${baseName()}-${f.id}.png`, previews[f.id].blob);
+    zip.file(`${baseName()}-messages.txt`, ["whatsapp", "social", "reminder"].map((k) => `=== ${TAB_NAMES[k]} ===\n${currentText(k)}`).join("\n\n"));
+    const blob = await zip.generateAsync({ type: "blob" });
+    await doSave(`${baseName()}.zip`, blob);
+  } finally { $("zipBtn").disabled = false; }
+});
+
+/* ---------- messages ---------- */
+const TAB_NAMES = { whatsapp: "הזמנה לוואטסאפ", social: "פוסט לרשתות", reminder: "תזכורת ביום המפגש" };
+let tab = "whatsapp";
+const custom = {};
+function currentText(k) { return custom[k] != null ? custom[k] : TEMPLATES[k](state.group, state.talk); }
+function showText() {
+  const ta = $("msgText");
+  if (document.activeElement !== ta || custom[tab] == null) ta.value = currentText(tab);
+  $("restoreBtn").hidden = custom[tab] == null;
+}
+$("tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  tab = b.dataset.tab;
+  $("tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+  $("msgStatus").textContent = "";
+  $("msgText").value = currentText(tab); $("restoreBtn").hidden = custom[tab] == null;
+});
+$("msgText").addEventListener("input", (e) => { custom[tab] = e.target.value; $("restoreBtn").hidden = false; });
+$("restoreBtn").addEventListener("click", () => { delete custom[tab]; showText(); $("msgStatus").textContent = ""; });
+$("copyBtn").addEventListener("click", () => {
+  const ta = $("msgText"), st = $("msgStatus");
+  const done = () => { st.textContent = "הועתק. אפשר להדביק בוואטסאפ."; st.className = "status ok"; };
+  try {
+    navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); st.textContent = "הטקסט מסומן. העתיקו אותו עם Ctrl+C או לחיצה ארוכה."; st.className = "status"; });
+  } catch (e) { ta.select(); st.textContent = "הטקסט מסומן. העתיקו אותו עם Ctrl+C או לחיצה ארוכה."; st.className = "status"; }
+});
+
+let sample = null;
+$("aiBtn").addEventListener("click", async () => {
+  const btn = $("aiBtn"), st = $("msgStatus");
+  btn.disabled = true; st.className = "status"; st.textContent = "Claude מנסח…";
+  const g = state.group, t = state.talk, d = dateParts(t.date);
+  const prompt = `אתה כותב הזמנות קצרות בעברית לקבוצת נטוורקינג עסקי BNI. בכל מפגש שבועי יש מצגת מרכזית של 10 דקות שבה חבר/ת קבוצה מציג/ה את התחום שלו/ה.
+כתוב שלושה נוסחים בטון ${$("aiTone").value}, בעברית טבעית ולא שיווקית מדי, בלי מילים מפוצצות ובלי להמציא עובדות.
+עובדות:
+- קבוצה: ${clean(g.chapter)}
+- מועד: ${d.long}, בשעה ${clean(g.time)}
+- מקום: ${clean(g.location) || "לא צוין"}
+- מציג/ה: ${clean(t.name)}, ${clean(t.profession)}
+- נושא: ${clean(t.title) || "לא צוין"}
+- על המצגת: ${clean(t.teaser) || "לא צוין"}
+- אישור הגעה: ${clean(g.contact) || "לא צוין"}
+- קישור: ${clean(g.link) || "אין"}
+1. "whatsapp": הזמנה לקבוצת וואטסאפ, 6-10 שורות, הדגשה בפורמט וואטסאפ (*מודגש*), לכל היותר 2 אימוג'ים, כולל המועד והמקום ועידוד להביא אורח. אם יש קישור או איש קשר, לכלול אותם.
+2. "social": פוסט לפייסבוק ואינסטגרם, 3-5 משפטים, ובסופו 3-4 האשטגים בעברית ובאנגלית כולל #BNI.
+3. "reminder": תזכורת קצרה לבוקר המפגש, 2-4 שורות.
+החזר JSON בלבד בצורה {"whatsapp": "...", "social": "...", "reminder": "..."}.`;
+  try {
+    const out = await sample.json(prompt);
+    let n = 0;
+    for (const k of ["whatsapp", "social", "reminder"]) if (out && typeof out[k] === "string" && out[k].trim()) { custom[k] = out[k].trim(); n++; }
+    if (!n) throw { code: "empty" };
+    $("msgText").value = currentText(tab); $("restoreBtn").hidden = custom[tab] == null;
+    st.textContent = "שלושת הנוסחים עודכנו. אפשר לערוך ישירות בתיבה."; st.className = "status ok";
+  } catch (e) {
+    st.className = "status err";
+    if (e && e.code === "not_granted") { st.textContent = "הניסוח עם Claude לא אושר, אז הוא מוסתר. הנוסח האוטומטי נשאר זמין."; $("aiBox").hidden = true; }
+    else if (e && e.code === "rate_limited") st.textContent = "יותר מדי בקשות ברצף. נסו שוב בעוד דקה.";
+    else st.textContent = "הניסוח לא הצליח הפעם. הנוסח האוטומטי נשאר בתיבה.";
+  } finally { btn.disabled = false; }
+});
+
+/* ---------- form binding ---------- */
+const G_FIELDS = ["chapter", "location", "time", "weekday", "contact", "link", "label"];
+const T_FIELDS = ["name", "profession", "title", "teaser", "date", "zoom", "ox", "oy"];
+function fillForm() {
+  G_FIELDS.forEach((k) => { $("g_" + k).value = state.group[k] ?? ""; });
+  T_FIELDS.forEach((k) => { $("t_" + k).value = state.talk[k] ?? ""; });
+  drawSwatches(); syncStyle(); syncThumbs(); updateCount();
+  $("exampleBadge").hidden = !state.example;
+}
+function changed(sideEffect) {
+  state.example = false; $("exampleBadge").hidden = true;
+  if (sideEffect) sideEffect();
+  persist(); scheduleRender(); showText();
+}
+G_FIELDS.forEach((k) => $("g_" + k).addEventListener("input", (e) => changed(() => {
+  state.group[k] = e.target.value;
+  if (k === "weekday") { state.talk.date = nextWeekday(+e.target.value); $("t_date").value = state.talk.date; }
+})));
+T_FIELDS.forEach((k) => $("t_" + k).addEventListener("input", (e) => changed(() => { state.talk[k] = e.target.value; if (k === "teaser") updateCount(); })));
+function updateCount() { $("teaserCount").textContent = `${(state.talk.teaser || "").length}/220`; }
+
+function drawSwatches() {
+  const box = $("swatches"); box.innerHTML = "";
+  const cur = state.group.accent.toUpperCase();
+  for (const c of SWATCHES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "swatch" + (c === cur ? " on" : ""); b.style.background = c;
+    b.setAttribute("aria-label", "צבע " + c); b.setAttribute("aria-pressed", String(c === cur));
+    b.addEventListener("click", () => changed(() => { state.group.accent = c; drawSwatches(); }));
+    box.appendChild(b);
+  }
+  const custom = document.createElement("label");
+  const isCustom = !SWATCHES.includes(cur);
+  custom.className = "swatch custom" + (isCustom ? " on" : ""); custom.title = "צבע אחר";
+  if (isCustom) custom.style.background = cur;
+  custom.innerHTML = `<input type="color" id="g_accent" aria-label="בחירת צבע אחר">`;
+  custom.querySelector("input").value = state.group.accent;
+  custom.querySelector("input").addEventListener("input", (e) => changed(() => { state.group.accent = e.target.value; custom.style.background = e.target.value; box.querySelectorAll(".swatch").forEach((s) => s.classList.toggle("on", s === custom)); }));
+  box.appendChild(custom);
+}
+function syncStyle() { document.querySelectorAll("[data-style]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.style === state.group.style))); }
+document.querySelectorAll("[data-style]").forEach((b) => b.addEventListener("click", () => changed(() => { state.group.style = b.dataset.style; syncStyle(); })));
+
+function syncThumbs() {
+  $("photoThumb").style.backgroundImage = state.talk.photo ? `url("${state.talk.photo}")` : "";
+  $("photoRemove").hidden = !state.talk.photo; $("photoSliders").hidden = !state.talk.photo;
+  $("logoThumb").style.backgroundImage = state.group.logo ? `url("${state.group.logo}")` : "";
+  $("logoRemove").hidden = !state.group.logo;
+}
+$("photoFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const url = await shrink(await readFile(file), 900, "image/jpeg");
+  e.target.value = "";
+  if (!url) return;
+  changed(() => { Object.assign(state.talk, { photo: url, zoom: 1, ox: 0, oy: 0 }); T_FIELDS.forEach((k) => { $("t_" + k).value = state.talk[k] ?? ""; }); syncThumbs(); });
+});
+$("photoRemove").addEventListener("click", () => changed(() => { state.talk.photo = null; syncThumbs(); }));
+$("logoFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const url = await shrink(await readFile(file), 600, "image/png");
+  e.target.value = "";
+  if (url) changed(() => { state.group.logo = url; syncThumbs(); });
+});
+$("logoRemove").addEventListener("click", () => changed(() => { state.group.logo = null; syncThumbs(); }));
+
+/* ---------- roster ---------- */
+let pendingDelete = null;
+function drawRoster(selectedId) {
+  const sel = $("rosterSel");
+  sel.innerHTML = "";
+  const o0 = document.createElement("option"); o0.value = ""; o0.textContent = state.roster.length ? `בחירה מהרשימה (${state.roster.length})` : "הרשימה ריקה עדיין"; sel.appendChild(o0);
+  [...state.roster].sort((a, b) => a.name.localeCompare(b.name, "he")).forEach((m) => {
+    const o = document.createElement("option"); o.value = m.id; o.textContent = m.profession ? `${m.name} · ${m.profession}` : m.name; sel.appendChild(o);
+  });
+  if (state.roster.length) { const od = document.createElement("option"); od.value = "__del"; od.textContent = "מחיקת החבר/ה הנבחר/ת מהרשימה"; od.disabled = !selectedId; sel.appendChild(od); }
+  sel.value = selectedId || "";
+}
+let currentMember = null;
+$("rosterSel").addEventListener("change", (e) => {
+  const v = e.target.value;
+  if (v === "__del") {
+    const m = state.roster.find((x) => x.id === currentMember);
+    e.target.value = currentMember || "";
+    if (!m) return;
+    pendingDelete = m.id; $("rosterConfirmText").textContent = `למחוק את ${m.name} מהרשימה?`; $("rosterConfirm").hidden = false;
+    return;
+  }
+  currentMember = v || null;
+  drawRoster(currentMember);
+  const m = state.roster.find((x) => x.id === v); if (!m) return;
+  changed(() => {
+    Object.assign(state.talk, { name: m.name, profession: m.profession, photo: m.photo || null, zoom: m.zoom ?? 1, ox: m.ox ?? 0, oy: m.oy ?? 0, title: "", teaser: "" });
+    T_FIELDS.forEach((k) => { $("t_" + k).value = state.talk[k] ?? ""; }); syncThumbs(); updateCount();
+  });
+  $("rosterMsg").textContent = `${m.name} נטען/ה. נשאר למלא נושא ומשפט פתיחה.`;
+  $("t_title").focus();
+});
+$("rosterSave").addEventListener("click", () => {
+  const t = state.talk; const name = clean(t.name);
+  if (!name) { $("rosterMsg").textContent = "צריך למלא שם לפני השמירה לרשימה."; return; }
+  let m = state.roster.find((x) => x.name === name);
+  const data = { name, profession: clean(t.profession), photo: t.photo, zoom: t.zoom, ox: t.ox, oy: t.oy };
+  if (m) Object.assign(m, data); else { m = { id: "m" + Date.now().toString(36), ...data }; state.roster.push(m); }
+  currentMember = m.id; persist(); drawRoster(m.id);
+  $("rosterMsg").textContent = `${name} נשמר/ה ברשימה.`;
+});
+$("rosterDelYes").addEventListener("click", () => {
+  const m = state.roster.find((x) => x.id === pendingDelete);
+  state.roster = state.roster.filter((x) => x.id !== pendingDelete);
+  pendingDelete = null; currentMember = null; $("rosterConfirm").hidden = true; persist(); drawRoster();
+  if (m) $("rosterMsg").textContent = `${m.name} נמחק/ה מהרשימה.`;
+});
+$("rosterDelNo").addEventListener("click", () => { pendingDelete = null; $("rosterConfirm").hidden = true; });
+
+/* ---------- backup ---------- */
+$("backupOut").addEventListener("click", async () => {
+  const st = $("backupStatus");
+  if (!downloads) { st.textContent = "השמירה הישירה לא זמינה בתצוגה הזו."; st.className = "status err"; return; }
+  try { await downloads.save({ filename: "bni-studio-backup.json", data: JSON.stringify({ group: state.group, roster: state.roster }) }); st.textContent = "קובץ הגיבוי נשמר."; st.className = "status ok"; }
+  catch (e) { st.textContent = e && e.code === "declined" ? "השמירה בוטלה." : "לא הצלחנו לשמור את הגיבוי."; st.className = "status"; }
+});
+$("backupIn").addEventListener("change", async (e) => {
+  const st = $("backupStatus"); const file = e.target.files[0]; e.target.value = ""; if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (!data || typeof data.group !== "object" || !Array.isArray(data.roster)) throw 0;
+    state.group = { ...SAMPLE_GROUP, ...data.group }; state.roster = data.roster; state.example = false;
+    persist(); fillForm(); drawRoster(); scheduleRender(); showText();
+    st.textContent = `הגיבוי נטען: פרטי הקבוצה ו-${data.roster.length} חברים.`; st.className = "status ok";
+  } catch (err) { st.textContent = "הקובץ הזה לא נראה כמו קובץ גיבוי של הסטודיו."; st.className = "status err"; }
+});
+
+/* ---------- boot ---------- */
+$("groupBox").open = state.example || !state.group.contact;
+buildPreviews(); fillForm(); drawRoster(); showText();
+const HE = "אבגדהוזחטיכלמנסעפצקרשת0123456789";
+Promise.all([
+  document.fonts.load(`400 80px "Secular One"`, HE),
+  document.fonts.load(`800 80px "Assistant"`, HE),
+  document.fonts.load(`600 80px "Assistant"`, HE),
+  document.fonts.load(`400 80px "Assistant"`, HE),
+]).catch(() => {}).finally(renderAll);
+document.fonts.addEventListener && document.fonts.addEventListener("loadingdone", scheduleRender);
+
+if (window.claude && window.claude.use) {
+  window.claude.use("downloads").then((d) => { downloads = d; if (!d) $("saveHint").hidden = false; }).catch(() => { $("saveHint").hidden = false; });
+  window.claude.use("sample").then((s) => { sample = s; $("aiBox").hidden = !s; }).catch(() => {});
+} else {
+  $("saveHint").hidden = false;
+}
+})();
+</script>
