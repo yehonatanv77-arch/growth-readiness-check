@@ -1,3 +1,4 @@
+<!--bni:start-->
 <title>סטודיו הזמנות BNI</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -109,7 +110,12 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
 .pv-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .pv-meta b { font-size: 14px; }
 .pv-meta span { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; direction: ltr; }
-@media (max-width: 560px) { .pv img { height: auto; width: 100%; } .pv { flex: 1 1 100%; } .pv.half { flex: 1 1 calc(50% - 9px); } .pv.wide img { width: 100%; } }
+@media (max-width: 560px) {
+  .previews { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: end; }
+  .pv:not(.half) { grid-column: 1 / -1; }
+  .pv img, .pv.wide img { height: auto; width: 100%; }
+  .pv.half .pv-meta { flex-wrap: wrap; }
+}
 
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 12px; border-bottom: 1px solid var(--line); }
 .tabs button { font: inherit; font-weight: 600; font-size: 14.5px; background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 10px; color: var(--muted); cursor: pointer; margin-bottom: -1px; }
@@ -123,19 +129,63 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
 .ai select { width: auto; padding: 7px 10px; }
 
 @media (prefers-reduced-motion: no-preference) { .btn, .seg button, .tabs button { transition: background-color .15s, border-color .15s, color .15s; } }
+
+/* Two audiences: the manager edits and publishes, members get this week's ready invite. */
+.page[data-mode="member"] .admin-only { display: none !important; }
+.page[data-mode="admin"] .member-only { display: none !important; }
+.page[data-mode="member"] .app { grid-template-columns: minmax(0, 1fr); max-width: 940px; margin-inline: auto; }
+.page[data-mode="member"] .top { max-width: 940px; margin-inline: auto; }
+.beta { font-family: var(--font-body); font-size: 12px; font-weight: 800; letter-spacing: .04em; vertical-align: middle; border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 999px; margin-inline-start: 8px; }
+.adminbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; background: var(--accent-soft); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 20px; }
+.adminbar b { font-size: 15px; }
+.adminbar .status { margin: 2px 0 0; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-inline-end: 6px; vertical-align: middle; }
+.dot.live { background: var(--ok); }
+.dot.pending { background: var(--accent); }
+.steps { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: baseline; }
+.steps li::before { content: counter(s); font-family: var(--font-display); font-size: 18px; color: var(--accent); }
+.rate { display: flex; flex-wrap: wrap; gap: 6px; }
+.rate button { font: inherit; font-weight: 600; min-width: 44px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
+.rate button[aria-pressed=true] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); max-width: 300px; }
+.fallback { background: var(--bg); border-radius: 8px; padding: 12px; white-space: pre-wrap; font-size: 14px; margin-top: 10px; user-select: all; }
+.fb-stats { display: flex; flex-wrap: wrap; gap: 24px; margin: 14px 0; }
+.fb-stats div { display: grid; }
+.fb-stats b { font-family: var(--font-display); font-weight: 400; font-size: 28px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.fb-stats span { font-size: 13px; color: var(--muted); }
+.fb-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.fb-list li { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 2px; }
+.fb-list .meta { font-size: 13px; color: var(--muted); }
+.preview-bar { position: fixed; inset: auto 0 0; z-index: 20; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; background: var(--fg); color: var(--bg); padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); font-weight: 600; }
+.preview-bar .btn { background: var(--bg); color: var(--fg); border-color: var(--bg); }
 </style>
 
-<div class="page" dir="rtl" lang="he">
+<script type="application/json" id="published">{"example":true}</script>
+
+<div class="page" dir="rtl" lang="he" id="page" data-mode="member">
   <header class="top">
     <div>
       <p class="eyebrow">המצגת המרכזית של השבוע</p>
-      <h1>סטודיו הזמנות BNI</h1>
-      <p class="lede">ממלאים מי מציג השבוע ומקבלים הודעת וואטסאפ, פוסט לרשתות, תזכורת בוקר וגרפיקה בארבעה פורמטים. פרטי הקבוצה ורשימת החברים נשמרים לשבוע הבא.</p>
+      <h1>סטודיו הזמנות BNI<span class="beta">בטא</span></h1>
+      <p class="lede admin-only">ממלאים מי מציג השבוע ומפרסמים. חברי הקבוצה שפותחים את הקישור מקבלים הזמנה מוכנה לשליחה לאורחים.</p>
+      <p class="lede member-only">ההזמנה למפגש הקרוב מוכנה. מעתיקים, שומרים ושולחים לאורחים.</p>
     </div>
   </header>
 
+  <div class="adminbar admin-only">
+    <div>
+      <b>מצב מנהל</b>
+      <p class="status" id="pubState"></p>
+    </div>
+    <div class="btnrow">
+      <button type="button" class="btn" id="previewBtn">איך החברים רואים את זה</button>
+      <button type="button" class="btn primary" id="publishBtn">פרסום לחברי הקבוצה</button>
+    </div>
+  </div>
+
   <main class="app">
-    <section class="col" aria-label="פרטים">
+    <section class="col admin-only" aria-label="פרטים">
       <details class="box" id="groupBox">
         <summary>פרטי הקבוצה <span class="hint">ממלאים פעם אחת</span></summary>
         <div class="fields">
@@ -220,6 +270,15 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
     </section>
 
     <section class="col" aria-label="תוצרים">
+      <div class="box member-only">
+        <h2>איך שולחים</h2>
+        <ol class="steps">
+          <li>מעתיקים את ההודעה בתיבה "הזמנה לאורח בוואטסאפ".</li>
+          <li>שומרים את תמונת הוואטסאפ, בכפתור "שמירה" או בלחיצה ארוכה על התמונה.</li>
+          <li>שולחים לאורחים שדיברתם איתם את התמונה ואת ההודעה.</li>
+        </ol>
+      </div>
+
       <div class="box">
         <div class="out-head">
           <h2>גרפיקה <span class="badge" id="exampleBadge">נתוני דוגמה</span></h2>
@@ -254,13 +313,60 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
         </div>
         <p class="status" id="msgStatus"></p>
       </div>
+
+      <form class="box member-only" id="fbForm" novalidate>
+        <h2>מה דעתך על הכלי?</h2>
+        <p class="note">זו גרסת בטא שאנחנו בודקים בקבוצה. דקה של משוב תעזור להחליט אם ולאן להמשיך.</p>
+        <div class="fields">
+          <div class="f" id="fbRateLabel">עד כמה הכלי חסך לך זמן השבוע?
+            <div class="rate" role="group" aria-labelledby="fbRateLabel" id="fbRate">
+              <button type="button" data-v="1" aria-pressed="false">1</button><button type="button" data-v="2" aria-pressed="false">2</button><button type="button" data-v="3" aria-pressed="false">3</button><button type="button" data-v="4" aria-pressed="false">4</button><button type="button" data-v="5" aria-pressed="false">5</button>
+            </div>
+            <div class="scale"><span>בכלל לא</span><span>הרבה מאוד</span></div>
+          </div>
+          <div class="f" id="fbSentLabel">שלחת את ההזמנה לאורחים?
+            <div class="seg" role="group" aria-labelledby="fbSentLabel" id="fbSent">
+              <button type="button" data-v="yes" aria-pressed="false">כן</button>
+              <button type="button" data-v="later" aria-pressed="false">עוד לא</button>
+              <button type="button" data-v="none" aria-pressed="false">לא היו לי אורחים</button>
+            </div>
+          </div>
+          <label class="f">מה היה מבלבל, חסר או מיותר?<textarea id="fbText" rows="3" maxlength="1000"></textarea></label>
+          <label class="f">שם <span class="sub">לא חובה</span><input type="text" id="fbName" maxlength="60"></label>
+          <div class="btnrow"><button type="submit" class="btn primary" id="fbSend">שליחת משוב</button></div>
+        </div>
+        <p class="status" id="fbStatus" role="status"></p>
+        <div id="fbFallback" hidden>
+          <div class="fallback" id="fbFallbackText"></div>
+          <div class="btnrow" style="margin-top:8px"><button type="button" class="btn" id="fbCopy">העתקת המשוב</button></div>
+        </div>
+      </form>
+
+      <div class="box admin-only" id="fbSummary">
+        <h2>משוב מהפיילוט</h2>
+        <p class="note" id="fbEmpty">עוד לא התקבל משוב. חברים מחוברים ל-Claude שולחים אותו מתוך הכלי, וחברים בלי חשבון מקבלים טקסט להעתקה ושולחים לך בוואטסאפ.</p>
+        <div class="fb-stats" id="fbStats" hidden>
+          <div><b id="fbCount">0</b><span>משיבים</span></div>
+          <div><b id="fbAvg">–</b><span>חיסכון בזמן, מתוך 5</span></div>
+          <div><b id="fbSentCount">0</b><span>שלחו לאורחים</span></div>
+        </div>
+        <ul class="fb-list" id="fbList"></ul>
+      </div>
     </section>
   </main>
+</div>
+
+<div class="preview-bar" id="previewBar" hidden>
+  זו התצוגה שחברי הקבוצה רואים
+  <button type="button" class="btn" id="previewBack">חזרה לעריכה</button>
 </div>
 
 <script>
 (() => {
 const $ = (id) => document.getElementById(id);
+// The page as written, captured before any script changes the DOM; publishing re-sends it with new state.
+const START = "<!-" + "-bni:start-->";
+const SOURCE = (() => { const h = document.body.innerHTML; const i = h.indexOf(START); return i >= 0 ? h.slice(i) : h; })();
 const KEY = "bni-studio-v1";
 const DISPLAY = '"Secular One", "Assistant", sans-serif';
 const BODY = '"Assistant", Arial, sans-serif';
@@ -282,22 +388,35 @@ function nextWeekday(wd) {
 const SAMPLE_GROUP = { chapter: "BNI אלפא", location: "אולמי הגן, רמת גן", time: "07:00", weekday: "2", contact: "יונתן, 050-0000000", link: "https://pay.example.co.il/bni-alpha", price: "80 ₪ כולל ארוחת בוקר", label: "המצגת המרכזית · 10 דקות", accent: "#A3142B", style: "color", logo: null };
 const SAMPLE_TALK = { name: "דנה לוי", profession: "יועצת משכנתאות", title: "שלוש טעויות שעולות לזוגות מאות אלפי שקלים במשכנתא", teaser: "מה לבדוק לפני שחותמים, ואיך מזהים לקוח שצריך ייעוץ עוד לפני שהוא עצמו יודע.", date: "", photo: null, zoom: 1, ox: 0, oy: 0 };
 
-let state = { group: { ...SAMPLE_GROUP }, talk: { ...SAMPLE_TALK, date: nextWeekday(2) }, roster: [], example: true };
-try {
-  const saved = JSON.parse(localStorage.getItem(KEY) || "null");
-  if (saved && saved.group) {
-    state = { ...state, ...saved, group: { ...SAMPLE_GROUP, ...saved.group }, talk: { ...SAMPLE_TALK, ...saved.talk } };
-    if (!state.talk.date || state.talk.date < new Date().toISOString().slice(0, 10)) state.talk.date = nextWeekday(+state.group.weekday);
-  }
-} catch (e) {}
+let PUB = {};
+try { PUB = JSON.parse($("published").textContent || "{}") || {}; } catch (e) {}
+const today = new Date().toISOString().slice(0, 10);
+let state = { group: { ...SAMPLE_GROUP, ...(PUB.group || {}) }, talk: { ...SAMPLE_TALK, ...(PUB.talk || {}) }, roster: [], example: PUB.example !== false, dirty: false };
+if (!state.talk.date) state.talk.date = nextWeekday(+state.group.weekday);
+let isAdmin = false;
 
-let saveTimer;
-function persist() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-  }, 300);
+// Manager only: the roster and any unpublished draft live in this browser.
+function loadAdminDraft() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (!saved) return;
+  if (Array.isArray(saved.roster)) state.roster = saved.roster;
+  const d = saved.draft;
+  if (d && d.dirty && d.basedOn === (PUB.publishedAt || 0)) {
+    state.group = { ...SAMPLE_GROUP, ...d.group }; state.talk = { ...SAMPLE_TALK, ...d.talk }; state.example = !!d.example; state.dirty = true;
+  } else if (!PUB.publishedAt && saved.group) {
+    state.group = { ...SAMPLE_GROUP, ...saved.group }; state.talk = { ...SAMPLE_TALK, ...saved.talk }; state.example = !!saved.example; state.dirty = !saved.example;
+  }
+  if (state.talk.date < today) state.talk.date = nextWeekday(+state.group.weekday);
 }
+function persistNow(basedOn) {
+  if (!isAdmin) return;
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ roster: state.roster, draft: { group: state.group, talk: state.talk, example: state.example, dirty: state.dirty, basedOn: basedOn ?? (PUB.publishedAt || 0) } }));
+  } catch (e) {}
+}
+let saveTimer;
+function persist() { clearTimeout(saveTimer); saveTimer = setTimeout(() => persistNow(), 300); }
 
 /* ---------- images ---------- */
 const imgCache = new Map();
@@ -735,9 +854,9 @@ function fillForm() {
   $("exampleBadge").hidden = !state.example;
 }
 function changed(sideEffect) {
-  state.example = false; $("exampleBadge").hidden = true;
+  state.example = false; $("exampleBadge").hidden = true; state.dirty = true;
   if (sideEffect) sideEffect();
-  persist(); scheduleRender(); showText();
+  persist(); scheduleRender(); showText(); updatePubState();
 }
 G_FIELDS.forEach((k) => $("g_" + k).addEventListener("input", (e) => changed(() => {
   state.group[k] = e.target.value;
@@ -857,8 +976,121 @@ $("backupIn").addEventListener("change", async (e) => {
   } catch (err) { st.textContent = "הקובץ הזה לא נראה כמו קובץ גיבוי של הסטודיו."; st.className = "status err"; }
 });
 
+/* ---------- publishing ---------- */
+const RESET = ":root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}";
+const OPEN_TAG = "<scr" + 'ipt type="application/json" id="published">';
+function buildDoc(pub) {
+  const json = JSON.stringify(pub).replace(/</g, "\\u003c");
+  const a = SOURCE.indexOf(OPEN_TAG), b = SOURCE.indexOf("</scr" + "ipt>", a);
+  const body = SOURCE.slice(0, a + OPEN_TAG.length) + json + SOURCE.slice(b);
+  return `<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>${RESET}</style></head><body>${body}</body></html>`;
+}
+function fmtWhen(ts) { return new Date(ts).toLocaleString("he-IL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }); }
+function updatePubState() {
+  const el = $("pubState"); el.className = "status"; el.textContent = "";
+  const dot = document.createElement("span");
+  let text;
+  if (state.dirty) { dot.className = "dot pending"; text = PUB.publishedAt ? "יש שינויים שעוד לא פורסמו. החברים רואים את הגרסה הקודמת." : "עוד לא פורסם. החברים רואים כרגע נתוני דוגמה."; }
+  else if (PUB.publishedAt) { dot.className = "dot live"; text = `פורסם ${fmtWhen(PUB.publishedAt)}. החברים רואים את מה שמוצג כאן.`; }
+  else { dot.className = "dot"; text = "עוד לא פורסם. החברים רואים כרגע נתוני דוגמה."; }
+  el.append(dot, text);
+}
+$("publishBtn").addEventListener("click", async () => {
+  const btn = $("publishBtn"), el = $("pubState");
+  const artifact = window.claude && window.claude.use ? await window.claude.use("artifact") : null;
+  if (!artifact) { el.className = "status err"; el.textContent = "הפרסום עובד רק כשהכלי פתוח בתוך claude.ai."; return; }
+  if (state.example) { el.className = "status err"; el.textContent = "עדיין מוצגים נתוני דוגמה. צריך למלא את פרטי הקבוצה והמציג/ה לפני הפרסום."; return; }
+  btn.disabled = true; btn.textContent = "מפרסם…";
+  const pub = { group: state.group, talk: state.talk, example: false, publishedAt: Date.now() };
+  state.dirty = false; persistNow(pub.publishedAt);
+  try {
+    await artifact.publish(buildDoc(pub));
+    el.className = "status ok"; el.textContent = "פורסם. מי שיפתח את הקישור יקבל את ההזמנה החדשה.";
+  } catch (e) {
+    state.dirty = true; persistNow();
+    if (e && e.code === "conflict") { el.className = "status"; el.textContent = "גרסה חדשה פורסמה בינתיים. הדף נטען מחדש."; return; }
+    el.className = "status err";
+    el.textContent = e && (e.code === "not_writer" || e.code === "not_granted") ? "אין לך הרשאה לפרסם את הכלי הזה. רק הבעלים או עורכים יכולים לפרסם." : "הפרסום לא הצליח. השינויים שמורים כאן, אפשר לנסות שוב.";
+  } finally { btn.disabled = false; btn.textContent = "פרסום לחברי הקבוצה"; }
+});
+$("previewBtn").addEventListener("click", () => { $("page").dataset.mode = "member"; $("previewBar").hidden = false; window.scrollTo(0, 0); });
+$("previewBack").addEventListener("click", () => { $("page").dataset.mode = "admin"; $("previewBar").hidden = true; });
+
+/* ---------- pilot feedback ---------- */
+let db = null, uid = null;
+const fb = { rating: 0, sent: "" };
+function pickIn(groupId, key) {
+  $(groupId).addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-v]"); if (!b) return;
+    fb[key] = key === "rating" ? +b.dataset.v : b.dataset.v;
+    $(groupId).querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  });
+}
+pickIn("fbRate", "rating"); pickIn("fbSent", "sent");
+const SENT_TEXT = { yes: "כן", later: "עוד לא", none: "לא היו לי אורחים" };
+$("fbForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const st = $("fbStatus");
+  if (!fb.rating) { st.className = "status err"; st.textContent = "צריך לבחור דירוג בין 1 ל-5."; return; }
+  const entry = { rating: fb.rating, sent: fb.sent || "", text: clean($("fbText").value), name: clean($("fbName").value), week: state.talk.date, at: Date.now() };
+  $("fbSend").disabled = true;
+  try {
+    if (!db || !uid) throw { code: "no_db" };
+    await db.collection("feedback").doc(uid).set(entry);
+    st.className = "status ok"; st.textContent = "תודה! המשוב נשלח. אפשר לשלוח שוב בשבוע הבא, והעדכון יחליף את הקודם.";
+    $("fbFallback").hidden = true;
+  } catch (err) {
+    $("fbFallbackText").textContent = joinLines([
+      "משוב על סטודיו ההזמנות (בטא):",
+      `חיסכון בזמן: ${entry.rating}/5`,
+      entry.sent && `שלחתי לאורחים: ${SENT_TEXT[entry.sent]}`,
+      entry.text && `הערות: ${entry.text}`,
+      entry.name && `שם: ${entry.name}`,
+    ]);
+    $("fbFallback").hidden = false;
+    st.className = "status"; st.textContent = "אי אפשר לשלוח מכאן בלי חשבון Claude. מעתיקים את המשוב ושולחים אותו בוואטסאפ למנהל הקבוצה.";
+  } finally { $("fbSend").disabled = false; }
+});
+$("fbCopy").addEventListener("click", () => {
+  const t = $("fbFallbackText").textContent, st = $("fbStatus");
+  const sel = () => { const r = document.createRange(); r.selectNodeContents($("fbFallbackText")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); st.textContent = "הטקסט מסומן. אפשר להעתיק אותו עם Ctrl+C או לחיצה ארוכה."; };
+  try { navigator.clipboard.writeText(t).then(() => { st.className = "status ok"; st.textContent = "המשוב הועתק. עכשיו מדביקים אותו בוואטסאפ למנהל הקבוצה."; }, sel); } catch (e) { sel(); }
+});
+function renderFeedback(rows) {
+  rows.sort((a, b) => (b.at || 0) - (a.at || 0));
+  $("fbEmpty").hidden = rows.length > 0; $("fbStats").hidden = rows.length === 0;
+  $("fbCount").textContent = rows.length;
+  const rated = rows.filter((r) => r.rating);
+  $("fbAvg").textContent = rated.length ? (rated.reduce((a, r) => a + r.rating, 0) / rated.length).toFixed(1) : "–";
+  $("fbSentCount").textContent = rows.filter((r) => r.sent === "yes").length;
+  const list = $("fbList"); list.innerHTML = "";
+  for (const r of rows) {
+    const li = document.createElement("li");
+    const meta = document.createElement("span"); meta.className = "meta";
+    meta.textContent = [r.name || "ללא שם", `${r.rating}/5`, r.sent && `שלח/ה לאורחים: ${SENT_TEXT[r.sent] || r.sent}`, r.at && new Date(r.at).toLocaleDateString("he-IL")].filter(Boolean).join(" · ");
+    li.appendChild(meta);
+    if (r.text) { const p = document.createElement("span"); p.textContent = r.text; li.appendChild(p); }
+    list.appendChild(li);
+  }
+}
+function watchFeedback() {
+  if (!db) return;
+  try { db.collection("feedback").onSnapshot((snap) => renderFeedback(snap.docs.filter((d) => d.exists).map((d) => d.data())), () => {}); } catch (e) {}
+}
+
+/* ---------- roles ---------- */
+let adminStarted = false;
+function enterAdmin() {
+  if (adminStarted) return; adminStarted = true;
+  isAdmin = true; loadAdminDraft();
+  $("page").dataset.mode = "admin";
+  $("groupBox").open = state.example;
+  fillForm(); drawRoster(); showText(); scheduleRender(); updatePubState();
+  if (sample) $("aiBox").hidden = false;
+  watchFeedback();
+}
+
 /* ---------- boot ---------- */
-$("groupBox").open = state.example;
 buildPreviews(); fillForm(); drawRoster(); showText();
 const HE = "אבגדהוזחטיכלמנסעפצקרשת0123456789";
 Promise.all([
@@ -870,10 +1102,20 @@ Promise.all([
 document.fonts.addEventListener && document.fonts.addEventListener("loadingdone", scheduleRender);
 
 if (window.claude && window.claude.use) {
-  window.claude.use("downloads").then((d) => { downloads = d; if (!d) $("saveHint").hidden = false; }).catch(() => { $("saveHint").hidden = false; });
-  window.claude.use("sample").then((s) => { sample = s; $("aiBox").hidden = !s; }).catch(() => {});
+  const use = (n) => window.claude.use(n).catch(() => null);
+  use("downloads").then((d) => { downloads = d; if (!d) $("saveHint").hidden = false; });
+  use("sample").then((s) => { sample = s; if (isAdmin && s) $("aiBox").hidden = false; });
+  Promise.all([use("user"), use("db")]).then(async ([user, d]) => {
+    db = d;
+    if (user) {
+      uid = await user.id().catch(() => null);
+      if (await user.canEdit().catch(() => false)) enterAdmin();
+    }
+  });
 } else {
+  // Opened as a plain file: it is the manager's own copy.
   $("saveHint").hidden = false;
+  enterAdmin();
 }
 })();
 </script>
