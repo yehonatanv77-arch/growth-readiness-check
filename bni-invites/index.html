@@ -158,6 +158,7 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
 .fb-list li { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 2px; }
 .fb-list .meta { font-size: 13px; color: var(--muted); }
 .preview-bar { position: fixed; inset: auto 0 0; z-index: 20; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; background: var(--fg); color: var(--bg); padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); font-weight: 600; }
+.page:has(~ .preview-bar:not([hidden])) { padding-bottom: 96px; }
 .preview-bar .btn { background: var(--bg); color: var(--fg); border-color: var(--bg); }
 </style>
 
@@ -271,6 +272,7 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
 
     <section class="col" aria-label="תוצרים">
       <div class="box member-only">
+        <p class="status err" id="staleNote" hidden></p>
         <h2>איך שולחים</h2>
         <ol class="steps">
           <li>מעתיקים את ההודעה בתיבה "הזמנה לאורח בוואטסאפ".</li>
@@ -378,19 +380,20 @@ const FORMATS = [
   { id: "facebook", label: "פייסבוק", w: 1200, h: 630, cls: "wide" },
 ];
 
+const localISO = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 function nextWeekday(wd) {
   const d = new Date(); d.setHours(12, 0, 0, 0);
   const diff = (wd - d.getDay() + 7) % 7 || 7;
   d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
+  return localISO(d);
 }
 
-const SAMPLE_GROUP = { chapter: "BNI אלפא", location: "אולמי הגן, רמת גן", time: "07:00", weekday: "2", contact: "יונתן, 050-0000000", link: "https://pay.example.co.il/bni-alpha", price: "80 ₪ כולל ארוחת בוקר", label: "המצגת המרכזית · 10 דקות", accent: "#A3142B", style: "color", logo: null };
+const SAMPLE_GROUP = { chapter: "BNI אלפא", location: "אולמי הגן, רמת גן", time: "07:00", weekday: "2", link: "https://pay.example.co.il/bni-alpha", price: "80 ₪ כולל ארוחת בוקר", label: "המצגת המרכזית · 10 דקות", accent: "#A3142B", style: "color", logo: null };
 const SAMPLE_TALK = { name: "דנה לוי", profession: "יועצת משכנתאות", title: "שלוש טעויות שעולות לזוגות מאות אלפי שקלים במשכנתא", teaser: "מה לבדוק לפני שחותמים, ואיך מזהים לקוח שצריך ייעוץ עוד לפני שהוא עצמו יודע.", date: "", photo: null, zoom: 1, ox: 0, oy: 0 };
 
 let PUB = {};
 try { PUB = JSON.parse($("published").textContent || "{}") || {}; } catch (e) {}
-const today = new Date().toISOString().slice(0, 10);
+const today = localISO(new Date());
 let state = { group: { ...SAMPLE_GROUP, ...(PUB.group || {}) }, talk: { ...SAMPLE_TALK, ...(PUB.talk || {}) }, roster: [], example: PUB.example !== false, dirty: false };
 if (!state.talk.date) state.talk.date = nextWeekday(+state.group.weekday);
 let isAdmin = false;
@@ -628,7 +631,7 @@ function footer(ctx, W, pad, y, P, S, u) {
   font(ctx, 800, 34 * u, BODY); ctx.fillStyle = P.fg; ctx.textAlign = "left"; ctx.fillText("אורחים מוזמנים", pad, y + 30 * u + right.size * 0.86 + (34 * u - right.size) * 0);
 }
 
-function layoutStack(ctx, f, S, P, k, imgs) {
+function layoutStack(ctx, f, S, P, k, imgs, withTeaser) {
   const W = f.w, H = f.h, u = W / 1080, pad = 76 * u;
   const story = f.id === "story", square = f.id === "square";
   const top = story ? 210 * u : 70 * u;
@@ -658,7 +661,7 @@ function layoutStack(ctx, f, S, P, k, imgs) {
     const ti = block(ctx, `"${clean(S.talk.title)}"`, { weight: 800, size: (story ? 58 : square ? 44 : 50) * u * k, min: 30 * u, fam: BODY, maxW, maxLines: story ? 3 : 2, lh: 1.2 });
     y += drawBlock(ctx, ti, W - pad, y, P.fg) + (story ? 36 : 20) * u * k;
   }
-  if (!square && clean(S.talk.teaser)) {
+  if (!square && withTeaser && clean(S.talk.teaser)) {
     const te = block(ctx, S.talk.teaser, { weight: 400, size: (story ? 40 : 34) * u * k, min: 26 * u, fam: BODY, maxW, maxLines: story ? 4 : 2, lh: 1.35 });
     if (story || y + te.h < footY - 24 * u) y += drawBlock(ctx, te, W - pad, y, P.sub);
   }
@@ -710,9 +713,12 @@ async function render(f, canvas) {
   const ctx = canvas.getContext("2d");
   const P = palette(state.group);
   const fn = f.id === "facebook" ? layoutWide : layoutStack;
-  for (const k of [1, 0.94, 0.88, 0.82, 0.76, 0.7]) {
+  const scales = [1, 0.94, 0.88, 0.82, 0.76, 0.7];
+  // The story keeps its teaser only while the text stays large enough to read.
+  const tries = f.id === "story" ? [...scales.slice(0, 4).map((k) => [k, true]), ...scales.map((k) => [k, false])] : scales.map((k) => [k, true]);
+  for (const [k, withTeaser] of tries) {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, f.w, f.h);
-    if (fn(ctx, f, state, P, k, imgs)) break;
+    if (fn(ctx, f, state, P, k, imgs, withTeaser)) break;
   }
 }
 
@@ -1000,6 +1006,10 @@ $("publishBtn").addEventListener("click", async () => {
   const artifact = window.claude && window.claude.use ? await window.claude.use("artifact") : null;
   if (!artifact) { el.className = "status err"; el.textContent = "הפרסום עובד רק כשהכלי פתוח בתוך claude.ai."; return; }
   if (state.example) { el.className = "status err"; el.textContent = "עדיין מוצגים נתוני דוגמה. צריך למלא את פרטי הקבוצה והמציג/ה לפני הפרסום."; return; }
+  const leftovers = [["chapter", "שם הקבוצה"], ["location", "מקום המפגש"], ["link", "קישור התשלום"], ["price", "דמי ההשתתפות"]]
+    .filter(([k]) => state.group[k] && state.group[k] === SAMPLE_GROUP[k]).map(([, l]) => l);
+  if (state.talk.name === SAMPLE_TALK.name) leftovers.push("שם המציג/ה");
+  if (leftovers.length) { el.className = "status err"; el.textContent = `עדיין מופיעים ערכי דוגמה: ${leftovers.join(", ")}. צריך להחליף אותם לפני הפרסום.`; return; }
   btn.disabled = true; btn.textContent = "מפרסם…";
   const pub = { group: state.group, talk: state.talk, example: false, publishedAt: Date.now() };
   state.dirty = false; persistNow(pub.publishedAt);
@@ -1091,6 +1101,10 @@ function enterAdmin() {
 }
 
 /* ---------- boot ---------- */
+if (!state.example && state.talk.date < today) {
+  $("staleNote").hidden = false;
+  $("staleNote").textContent = `ההזמנה כאן היא למפגש שכבר עבר (${dateParts(state.talk.date).long}). ההזמנה לשבוע הזה עוד לא פורסמה.`;
+}
 buildPreviews(); fillForm(); drawRoster(); showText();
 const HE = "אבגדהוזחטיכלמנסעפצקרשת0123456789";
 Promise.all([
