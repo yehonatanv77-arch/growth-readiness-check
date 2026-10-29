@@ -150,7 +150,6 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
               </select>
             </label>
           </div>
-          <label class="f">אישור הגעה / איש קשר <span class="sub">שם וטלפון, יופיע בהודעה</span><input type="text" id="g_contact"></label>
           <label class="f">קישור לתשלום <span class="sub">האורח משלם דרכו ושומר את המקום</span><input type="url" id="g_link" dir="ltr" placeholder="https://"></label>
           <label class="f">דמי השתתפות <span class="sub">לא חובה, למשל: 80 ₪ כולל ארוחת בוקר</span><input type="text" id="g_price"></label>
           <label class="f">כותרת התווית בגרפיקה<input type="text" id="g_label"></label>
@@ -238,7 +237,6 @@ input[type=range] { accent-color: var(--accent); width: 100%; }
           <button role="tab" type="button" data-tab="social" aria-selected="false">פוסט לפייסבוק ואינסטגרם</button>
           <button role="tab" type="button" data-tab="reminder" aria-selected="false">תזכורת ביום המפגש</button>
         </div>
-        <label class="f" id="guestRow" style="margin-bottom:12px">שם האורח <span class="sub">לא חובה. ההזמנה בוואטסאפ פונה אליו בשמו</span><input type="text" id="m_guest"></label>
         <textarea id="msgText" aria-label="נוסח ההודעה"></textarea>
         <div class="msg-actions">
           <div class="btnrow">
@@ -356,8 +354,8 @@ const TEMPLATES = {
   whatsapp(g, t) {
     const d = dateParts(t.date);
     return joinLines([
-      `היי${clean(guestName) ? ` ${clean(guestName)}` : ""}, שמחתי שדיברנו!`,
-      `הנה כל הפרטים למפגש *${clean(g.chapter)}*:`,
+      `שמחים שמצטרפים אלינו למפגש *${clean(g.chapter)}*!`,
+      "הנה כל הפרטים:",
       "",
       `🗓️ ${d.long} | ${clean(g.time)}`,
       clean(g.location) && `📍 ${clean(g.location)}`,
@@ -370,7 +368,6 @@ const TEMPLATES = {
       clean(g.price) && `דמי השתתפות: ${clean(g.price)}`,
       clean(g.link) ? `כדי לשריין את המקום, אפשר לשלם כאן:\n${clean(g.link)}` : "כדי לשריין את המקום, נשמח לאישור הגעה.",
       "",
-      clean(g.contact) && `לכל שאלה: ${clean(g.contact)}`,
       "מחכים לראות אותך!",
     ]);
   },
@@ -382,7 +379,7 @@ const TEMPLATES = {
       clean(t.teaser),
       "",
       `${d.long} · ${clean(g.time)}${clean(g.location) ? ` · ${clean(g.location)}` : ""}`,
-      `אורחים מוזמנים${clean(g.contact) ? `. לפרטים: ${clean(g.contact)}` : ""}`,
+      "אורחים מוזמנים.",
       "",
       ["#BNI", "#נטוורקינג", "#עסקים", hashtag(t.profession)].filter(Boolean).join(" "),
     ]);
@@ -669,9 +666,7 @@ $("zipBtn").addEventListener("click", async () => {
 /* ---------- messages ---------- */
 const TAB_NAMES = { whatsapp: "הזמנה לאורח בוואטסאפ", social: "פוסט לרשתות", reminder: "תזכורת ביום המפגש" };
 let tab = "whatsapp";
-let guestName = "";
 const custom = {};
-$("m_guest").addEventListener("input", (e) => { guestName = e.target.value; showText(); });
 function currentText(k) { return custom[k] != null ? custom[k] : TEMPLATES[k](state.group, state.talk); }
 function showText() {
   const ta = $("msgText");
@@ -681,7 +676,6 @@ function showText() {
 $("tabs").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-tab]"); if (!b) return;
   tab = b.dataset.tab;
-  $("guestRow").hidden = tab !== "whatsapp";
   $("tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
   $("msgStatus").textContent = "";
   $("msgText").value = currentText(tab); $("restoreBtn").hidden = custom[tab] == null;
@@ -710,11 +704,9 @@ $("aiBtn").addEventListener("click", async () => {
 - מציג/ה: ${clean(t.name)}, ${clean(t.profession)}
 - נושא: ${clean(t.title) || "לא צוין"}
 - על המצגת: ${clean(t.teaser) || "לא צוין"}
-- איש קשר לשאלות: ${clean(g.contact) || "לא צוין"}
 - דמי השתתפות: ${clean(g.price) || "לא צוין"}
 - קישור לתשלום: ${clean(g.link) || "אין"}
-- שם האורח: ${clean(guestName) || "לא ידוע, לפנות בלי שם"}
-1. "whatsapp": הודעה אישית לאורח שכבר דיברנו איתו בטלפון והסכים להגיע. 7-12 שורות. פותחים בפנייה אישית קצרה, נותנים את המועד, המקום ומי מציג, ומסיימים בבקשה לשריין מקום דרך קישור התשלום (להעתיק את הקישור בדיוק כמו שהוא, בשורה נפרדת) ובציון דמי ההשתתפות אם צוינו. הדגשה בפורמט וואטסאפ (*מודגש*), לכל היותר 2 אימוג'ים, בלי לחץ מכירתי. ניסוח ניטרלי מגדרית כלפי האורח.
+1. "whatsapp": הודעה לאורחים שכבר דיברנו איתם והסכימו להגיע. אותה הודעה נשלחת לכמה אורחים, אז בלי שם של אורח, בלי שם של השולח ובלי מספר טלפון. 7-12 שורות. פותחים במשפט קבלת פנים קצר, נותנים את המועד, המקום ומי מציג, ומסיימים בבקשה לשריין מקום דרך קישור התשלום (להעתיק את הקישור בדיוק כמו שהוא, בשורה נפרדת) ובציון דמי ההשתתפות אם צוינו. הדגשה בפורמט וואטסאפ (*מודגש*), לכל היותר 2 אימוג'ים, בלי לחץ מכירתי. ניסוח ניטרלי מגדרית כלפי האורח.
 2. "social": פוסט פומבי לפייסבוק ואינסטגרם, 3-5 משפטים, בלי קישור התשלום, ובסופו 3-4 האשטגים בעברית ובאנגלית כולל #BNI.
 3. "reminder": תזכורת קצרה לבוקר המפגש, 2-4 שורות, בלי קישור התשלום.
 החזר JSON בלבד בצורה {"whatsapp": "...", "social": "...", "reminder": "..."}.`;
@@ -734,7 +726,7 @@ $("aiBtn").addEventListener("click", async () => {
 });
 
 /* ---------- form binding ---------- */
-const G_FIELDS = ["chapter", "location", "time", "weekday", "contact", "link", "price", "label"];
+const G_FIELDS = ["chapter", "location", "time", "weekday", "link", "price", "label"];
 const T_FIELDS = ["name", "profession", "title", "teaser", "date", "zoom", "ox", "oy"];
 function fillForm() {
   G_FIELDS.forEach((k) => { $("g_" + k).value = state.group[k] ?? ""; });
@@ -866,7 +858,7 @@ $("backupIn").addEventListener("change", async (e) => {
 });
 
 /* ---------- boot ---------- */
-$("groupBox").open = state.example || !state.group.contact;
+$("groupBox").open = state.example;
 buildPreviews(); fillForm(); drawRoster(); showText();
 const HE = "אבגדהוזחטיכלמנסעפצקרשת0123456789";
 Promise.all([
